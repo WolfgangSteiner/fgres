@@ -1,0 +1,50 @@
+fgres string replace utility for binary and text files/pipes
+
+-------------------------------------------------------------------------------
+
+Copyright (c) 1994, W. Stumvoll, Germany
+
+Some legal stuff:
+
+Use this software package at your own  risk.  The  programmer  cannot  be  held
+liable  for  any  incurred  damages,  directly or indirectly due to the use  or
+inability to use this software.
+
+You are encouraged to distribute this package freely. This package  is  however
+not to be sold (minor transfer costs excepted) or included in any  commercially
+sold software package (if you want to  do  this  anyway,  contact  me  (address
+below), and we'll work something out).
+
+If you distribute it, please leave the package intact. You are allowed to  take
+parts from this distribution and distribute these separately  as  long  as  you
+retain the copyright messages. If you redistribute any part  of this package in
+a modified form, be sure to  mark  the  parts  you  changed.  If  you have some
+important  changes  that  might be useful to the rest of the world, contact  me
+instead.           
+
+stumvoll@pool.informatik.rwth-aachen.de
+
+-------------------------------------------------------------------------------
+Submitted-By: stumvoll@pool.informatik.rwth-aachen.de (Wolfgang Stumvoll)
+Archive-Name: fgres/part01
+Environment: ANSI-C, UNIX
+
+fgres' ( Fast GREp and Substitute ) primary function is to substitute or delete
+character patterns. It can operate on binary and text files or in a pipe. 
+
+It is ideally suited for  quick  and  dirty  replacements  in  multiple  files.
+Especially for this  purpose, fgres supports in situ replacements, which do not
+need any temporary files.
+
+For example:
+   If you want to replace all variables `foo' by `foobar' in all  your  program
+   sources, a mere:
+
+      fgres foo foobar *.[ch]
+
+   will do.
+
+The more demanding user can create fgres command files. They  can  contain  any
+number of substitution patterns which will  be  simultaneously searched for and
+can be collected in named groups.  These  groups can be used to generate finite
+automatons.

@@ -1,0 +1,66 @@
+.\\"{{{\ \ comment .\\"\ skipped\ auto-comment -write -default +comm_skip
+\# comm_skip
+\\"}}} \# +write -comm_skip +default
+\#
+\## constant fold started
+"BLOCKS"	64
+\## constant fold started
+"BLOCKSIZE"	16384
+\## constant fold started
+"START_COUNT"	0
+"STD_FILE"	-
+"WRT_GROUP"	write
+"POS_GROUP"	position
+"DFLT_GROUP"	default
+"QUOTE_CHAR"	\\e
+"QUOTE_FOR_NL"	n
+"QUOTE_FOR_TAB"	t
+"DFLT_SEPARATOR"	space\\fP\ or\ \\fBtab
+"CMD_ADRESS"	#
+"CMD_REGION_LEN"	\\-
+"CMD_START"	+
+"CMD_STOP"	\\-
+"OPT_BIN"	b
+"OPT_CMD"	e
+"OPT_CMDF"	f
+"OPT_GROW"	g
+"OPT_HELP"	h
+"OPT_CASE"	i
+"OPT_BLOCKS"	n
+"OPT_PAD"	p
+"OPT_IN"	r
+"OPT_SHRINK"	s
+"OPT_VERB"	v
+"OPT_OUT"	w
+"OPT_SEP"	F
+\## constant fold started
+"VERSION"	1.5
+.\\"{{{\ \ comment .\\"\ skipped\ auto-comment -write -default +comm_skip
+\# comm_skip
+\\"}}} \# +write -comm_skip +default
+\#
+\## msg fold started
+"error_close_f"	\\fBcannot\ close\ \\fP\\fIfile-name\\fP\\fB\ (\\fP\\fIsystem-error\\fP\\fB)\\fP
+"error_empty_search"	\\fBempty\ search\ (\\fP\\fIprogram-position\\fP\\fB)\\fP
+"error_group"	\\fBgroup\ active\ (\\fP\\fIprogram-position\\fP\\fB)\\fP
+"error_grow_command"	\\fBgrowing\ command\ (\\fP\\fIprogram-position\\fP\\fB)\\fP
+"error_invalid_group"	\\fBinvalid\ group\ id\ (\\fP\\fIprogram-position\\fP\\fB)\\fP
+"error_memory"	\\fBno\ more\ memory,\ malloc\ \\fP\\fInumber-bytes\\fP\\fB\ bytes\ failed\\fP
+"error_noblocks"	\\fB-n:\ invalid\ value\\fP
+"error_no_group"	\\fBno\ group\ active\ (\\fP\\fIprogram-position\\fP\\fB)\\fP
+"error_no_prog"	\\fBno\ program\ given\\fP
+"error_open_file"	\\fBcannot\ open\ \\fP\\fIfile-type\\fP\\fB\ file\ \\fP\\fIfile-name\\fP\\fB\ (\\fP\\fIsystem-error\\fP\\fB)\\fP
+"error_open_group"	\\fBgroup\ open\ at\ end\ of\ program\\fP
+"error_pos"	\\fB-b\ disables\ position\ output\ (\\fP\\fIprogram-position\\fP\\fB)\\fP
+"error_redirect"	\\fBoption\ r/w\ and\ file\ argument\ conflict\\fP
+"error_seek"	\\fBseek\ failed\ (\\fP\\fIsystem-error\\fP\\fB)\\fP
+"error_separator"	\\fB-F:\ invalid\ string,\ using\ default\\fP
+"error_shrink_command"	\\fBshrinking\ command\ (\\fP\\fIprogram-position\\fP\\fB)\\fP
+"error_stop_write"	\\fB-b\ disables\ stop\ writing\ (\\fP\\fIprogram-position\\fP\\fB)\\fP
+"error_truncate"	\\fBtruncate\ file\ failes,\ padded\ with\ \\fP\\fInumber-bytes\\fP\\fB\ 0\\fP
+"error_unlink"	\\fBremove\ temporary\ file\ failed\ (\\fP\\fIsystem-error\\fP\\fB)\\fP
+"error_write"	\\fBwrite\ failed\ (\\fP\\fIsystem-error\\fP\\fB)\\fP
+\## msg fold started
+"warn_long_replace"	\\fBcut\ long\ replace\ (\\fP\\fIprogram-position\\fP\\fB)\\fP
+"warn_short_replace"	\\fBpadding\ short\ replace\ (\\fP\\fIprogram-position\\fP\\fB)\\fP
+"warn_temp_file"	\\fB(using\ temporary\ file\ \\fP\\fIfile-name\\fP\\fB)\\fP

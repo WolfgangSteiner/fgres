@@ -1,0 +1,492 @@
+.\' t
+.TH FGRES 1 "February 16, 1994"
+.\"{{{}}}
+.\"{{{  Name
+.SH NAME
+fgres \- search and replace character patterns (v1.5) 
+.\"}}}
+.\" skipped auto-comment
+.\"{{{  Synopsis
+.SH SYNOPSIS
+.ad l
+\fBfgres\fP \fI<options>\fP \fIsearch\fP [\fIreplace\fP [\fIfile\fP .\|.\|.\|]]
+.br
+\fBfgres\fP \fI<options>\fP [\fB\-r\fP \fIin\fP] [\fB\-w\fP \fIout\fP] \fIsearch\fP [\fIreplace\fP]
+.br
+\fBfgres\fP \fI<options>\fP \fI<program>\fP [\fIfile\fP .\|.\|.\|]
+.br
+\fBfgres\fP \fI<options>\fP \fI<program>\fP [\fB\-r\fP \fIin\fP] [\fB\-w\fP \fIout\fP]
+.br
+.br
+where:
+.br
+  \fI<options>\fP=[\fB\-bghipsv\fP] [\fBn\fP \fInumber\fP] [\fB\-F\fP \fIdelimiter\fP]
+  \fI<program>\fP=(\fB\-f\fP \fIcommand-file\fP | \fB\-e\fP \fIcommand\fP) .\|.\|.
+.ad b
+.\"}}}
+.\"{{{  Description
+.SH DESCRIPTION
+.\"{{{  general description
+.SS "General Description"
+\fBfgres\fP (\fBF\fPast \fBGRE\fPp and \fBS\fPubstitute) primary
+function is to substitute or delete character patterns.  It can operate
+on binary and text files or in a pipe.
+.PP
+The command language consists of very straightforward substitution
+patterns.  These commands can be collected in named groups, which can be
+dynamically enabled and disabled.
+.PP
+In addition to the \fBfgres\fP command language, you can also use simple 
+command line arguments for search and replace patterns.
+.\"}}}
+.\"{{{  command line
+.SS "Search and Replace Patterns on Command Line"
+This can be used in the follwoing two ways:
+.TP
+\fBfgres\fP \fI<options>\fP \fIsearch\fP \fIreplace\fP \fIfile\fP .\|.\|.\|
+Replace \fIsearch\fP with \fIreplace\fP (default: empty word) in all
+files \fIfile\fP .\|.\|.  .  The replacement is done in the files,
+without copying them.
+.TP
+\fBfgres\fP \fI<options>\fP [\fB\-r\fP \fIin\fP] [\fB\-w\fP \fIout\fP] \fIsearch\fP [\fIreplace\fP]
+Replace \fIsearch\fP with \fIreplace\fP (default: empty word).  Read all
+files given with \fB\-r\fP \fIin\fP (default: standard input) and
+write to the file, given with \fB\-w\fP \fIout\fP (default:
+standard output).
+.PP
+\fIsearch\fP and \fIreplace\fP are taken literally. 
+.\"}}}
+.\"{{{  program
+.SS "Program with \-e or \-f:"
+This can be used in the following two ways:
+.TP
+\fBfgres\fP \fI<options>\fP \fI<program>\fP \fIfile\fP .\|.\|.\|
+Execute the command given in \fI<program>\fP and the corresponding 
+actions in all files \fIfile\fP .\|.\|. .
+The replacement is done in the files, without copying them.
+.TP
+\fBfgres\fP \fI<options>\fP \fI<program>\fP [\fB\-r\fP \fIin\fP] [\fB\-w\fP \fIout\fP]
+Execute the command given in \fI<program>\fP and the corresponding
+actions.  Read all files given with \fB\-r\fP \fIin\fP (default:
+standard input) and write to the file, given with \fB\-w\fP
+\fIout\fP (default: standard output).
+.PP
+The basic elements of the \fBfgres\fP program \fI<program>\fP are
+search-and-replace commands.  While these commands can be grouped and
+those groups can be switched on and off, you can build up a kind of a
+\fBfinite state machine\fP.  In detail, a \fBfgres\fP program is a
+sequence of the following statements (field separator is set to the
+default \fBspace\fP or \fBtab\fP):
+.\"{{{  fgres comments
+.IP "\fB\e##\fP this is a comment"
+No comment :-)
+.\"}}}
+.\"{{{  pattern
+.IP "\fIsearch\fP [\fIreplace\fP [ (\fB+\fP|\fB\-\fP)\fIswitch\fP .\|.\|.\|]]"
+Replace the \fIsearch\fP string with \fIreplace\fP and execute the optional
+switches. A switch turns on/off the corresponding named group of commands.
+If switches have to be used with the empty replace string, use
+\fB\e#\fP for \fIreplace\fP.
+.\"}}}
+.\"{{{  address
+.IP "\fB\e#\fP\fIstart\fP[\fB\-\fP\fIlen\fP] [\fIreplace\fP [ (\fB+\fP|\fB\-\fP)\fIswitch\fP .\|.\|.\|]]"
+Replace the \fIlen\fP characters, starting at byte number \fIstart\fP
+(0 is the first), with \fIreplace\fP and execute the optional
+switches.  \fIlen\fP defaults to zero.  \fIstart\fP and \fIlen\fP can be
+decimal, octal (starting with 0) or hex (starting with 0x).  If switches have
+to be used with the empty replace string, use
+\fB\e#\fP for \fIreplace\fP.
+.\"}}}
+.\"{{{  group
+.PP
+\fB\e#\fP \fIname\fP
+.br
+   \fIcommand-1\fP
+.br
+    :
+   \fIcommand-n\fP
+.br
+.br
+\fB\e#\fP
+.IP
+All \fIcommand\fPs belong to the group \fIname\fP.  They are controlled by
+corresponding (\fB+\fP|\fB\-\fP)\fIname\fP switches.
+Named groups are switched off at startup.  Nested groups are not allowed.
+.RS
+.PP
+There are three reserved group names:
+.\"{{{  default
+.IP \fBdefault\fP
+This group contains all commands, which are declared outside of groups.
+.\"}}}
+.\"{{{  write
+.IP \fBwrite\fP
+These switches do not belong to a set of commands, but switch on/off writing to
+the output file.  If \fB+write\fP and
+\fB\-write\fP are both used for a command line, the
+replace pattern is printed and output is disabled afterwards.
+.\"}}}
+.\"{{{  position
+.IP \fBposition\fP
+These switches do not belong to a set of commands, but print the current match
+position in hex.  If \fB+\fP(\fB\-\fP) is used, the
+position will be printed in front (behind) of the replace pattern.  If
+\fB+\fP and \fB\-\fP are used together, only the last
+one will be activated.  Like in adress patterns, counting starts with
+0.
+.\"}}}
+.RE
+.\"}}}
+.PP
+In strings, you can use \fB\e\e\fP to get a
+\fB\e\fP, \fB\en\fP to get a
+\fBnewline\fP and \fB\et\fP to get a \fBtab\fP.
+You can also use \fB\e\fP followed by a decimal, octal
+(starting with 0) or hex (starting with 0x) number to get any character
+(non-printables!) of your character set.
+.PP
+Group identifiers can consist of \fBa\fP-\fBzA\fP-\fBZ_0\fP-\fB9\fP.
+.\"}}}
+.\"}}}
+.\"{{{  Options
+.SH OPTIONS
+.\"{{{  e
+.TP
+\fB\-e\fP \fIcommand\fP
+Add \fBexpression\fP \fIcommand\fP to the command list.  \fIcommand\fP
+may contain one line of a \fBfgres\fP program.
+.\"}}}
+.\"{{{  f
+.TP
+\fB\-f\fP \fIcmd-file\fP
+Read commands from \fBfile\fP \fIcmd-file\fP. 
+.\"}}}
+.\"{{{  F
+.TP
+\fB\-F\fP \fIdelimiter\fP
+Any character in the string \fIdelimiter\fP will be used as \fBfield
+separator\fP on \fBfgres\fP program lines.  The default is
+\fBspace\fP or \fBtab\fP.
+.\"}}}
+.\"{{{  i
+.TP
+\fB\-i\fP
+Pattern matching is done \fBcase insensitive\fP.
+.\"}}}
+.\"{{{  b
+.TP
+\fB\-b\fP
+Allow only replace commands, which do not change the filesize (typically
+used on \fBbinary\fP files).
+.\"}}}
+.\"{{{  g
+.TP
+\fB\-g\fP
+If \fB\-b\fP was used, this option enables commands, which
+let the file \fBgrow\fP.  If option \fB\-b\fP is used after
+\fB\-g\fP, this will overwrite \fB\-g\fP!
+.\"}}}
+.\"{{{  s
+.TP
+\fB\-s\fP
+If \fB\-b\fP was used, this option enables commands, which
+let the file \fBshrink\fP.  If option \fB\-b\fP is used
+after \fB\-s\fP, this will overwrite
+\fB\-s\fP!
+.\"}}}
+.\"{{{  p
+.TP
+\fB\-p\fP
+Activate \fBpadding\fP.  If \fB\-b\fP was used, pad
+substitute patterns with trailing null characters or cut them off, in
+order to match the length of the search pattern.  Using
+\fB\-s\fP or \fB\-g\fP disables padding
+respectively cutting.
+.\"}}}
+.\"{{{  v
+.TP
+\fB\-v\fP
+Switch on \fBverbose\fP mode.  \fBfgres\fP prints information about read
+and written bytes and meybe some warning messages, if
+\fB\-p\fP is used.
+.\"}}}
+.\"{{{  r
+.TP
+\fB\-r\fP \fIin\fP
+\fBRead\fP from file \fIin\fP.  If \fIin\fP is \fB-\fP,
+standard input is used. Multiple usage of \fB\-r\fP is allowed.
+.\"}}}
+.\"{{{  w
+.TP
+\fB\-w\fP \fIout\fP
+\fBWrite\fP to file \fIout\fP.  If \fIout\fP is \fB-\fP, standard
+output is used.
+.\"}}}
+.\"{{{  n
+.TP
+\fB\-n\fP \fInumber\fP
+If \fBfgres\fP is not used in a pipe, \fBfgres\fP stores blocks of
+16384 characters in memory, while extending files.  This option
+overwrites the default value of 64 blocks by \fInumber\fP blocks.
+.\"}}}
+.\"{{{  h
+.TP
+\fB\-h\fP
+Print a long usage as \fBhelp\fP.
+.\"}}}
+.\"}}}
+.\"{{{  Errors
+.SH "RETURN VALUE and ERRORS"
+\fBfgres\fP uses standard output only, if \fBfgres\fP was used in a pipe
+(\fB\-r\fP or \fB\-w\fP or no filter files on command
+line).  The following exit values are used by \fBfgres\fP:
+.PP
+.TS
+tab(@);
+l r | l.
+Exit Status@@Used for
+_
+\fBEX_OK\fP@(0)@everything goes as planed
+
+\fBEX_USAGE\fP@(64)@command line arguments are incorrect
+\fBEX_DATAERR\fP@(65)@\fBfgres\fP program is incorrect or missing
+\fBEX_NOINPUT\fP@(66)@error on reading the filter source
+\fBEX_SOFTWARE\fP@(70)@should never appear
+\fBEX_OSERR\fP@(71)@error on \fImalloc\fP(3), \fIlseek\fP(2),..
+\fBEX_CANTCREAT\fP@(73)@error on writing the filter output
+\fBEX_IOERR\fP@(74)@error on reading/writing
+_
+@(\fI*\fP)@T{
+These are the standard UNIX values for the given symbolic constants.
+T}
+.TE
+.\"}}}
+.\"{{{  examples
+.SH EXAMPLES
+.\"{{{  simple
+.SS "Simple Replacement"
+Substitue all occurrences of \fIfoo\fP with \fIbar\fP in file \fIname\fP:
+.IP
+\fBfgres\fP \fIfoo bar name\fP
+.PP
+or
+.IP
+\fBfgres \-e "\fP\fIfoo bar\fP\fB"\fP \fIname\fP
+.\"}}}
+.\"{{{  long
+.SS "Tagged Replacement"
+Substitute the string \fIfoo\fP with \fIbar\fP in the string part of an
+assembler listing \fIlist\fP.  The string part begins with a line
+\fIBEGIN_STRING_DATA\fP and ends at a line \fIEND_STRING_DATA\fP:
+.\"{{{  called with script
+.IP "Use \fBfgres\fP script file \fIfoobar.script\fP:"
+.sp
+\fB\e##\fP start foo-bar replace if matching:
+.br
+\fIBEGIN_STRING_DATA BEGIN_STRING_DATA\fP \fB+\fPfoobar
+.sp
+\fB\e#\fP foobar
+.br
+   \fB\e##\fP this is the replace line
+.br
+   \fIfoo bar\fP
+.br
+\fB\e#\fP
+.sp
+\fB\e##\fP end foo-bar replace if matching:
+.br
+\fIEND_STRING_DATA END_STRING_DATA\fP \fB\-\fPfoobar
+.IP "and call:"
+.sp
+\fBfgres \-f\fP \fIfoobar.script list\fP
+.\"}}}
+.\"{{{  called via command line
+.IP "or simulate \fIfoobar.script\fP with \fB\-e\fP options and call:"
+.sp
+\fBfgres \e\fP
+.br
+  \fB\-e "\fP\fIBEGIN_STRING_DATA BEGIN_STRING_DATA\fP \fB+\fPfoobar\fB" \e\fP
+.br
+  \fB\-e "\e# \fPfoobar\fB" \e\fP
+.br
+  \fB\-e "\fP   \fIfoo bar\fP\fB" \e\fP
+.br
+  \fB\-e "\e#" \e\fP
+.br
+  \fB\-e "\fP\fIEND_STRING_DATA END_STRING_DATA\fP \fB\-\fPfoobar\fB" \e\fP
+.br
+  \fIlist\fP
+.\"}}}
+.\"}}}
+.\"{{{  get positions
+.SS "Show Positions"
+Get all positions of string \fIpattern\fP in a file \fIsource\fP (which can be
+a binary file, so that \fIgrep\fP(1) and similar commands cannot be used):
+.RS
+.IP "Use \fBfgres\fP with options:"
+.sp
+\fBfgres \-r\fP \fIsource\fP \fB\e\fP
+.br
+  \fB\-e '\e#0 \e# \-write' \e\fP
+.br
+  \fB\-e '\fP\fIpattern\fP \fB\en +write \-write +position'\fP
+.RE
+.\"}}}
+.\"{{{  count occurrences
+.SS "Count Occurrences"
+Count the number of occurrences of string \fIpattern\fP in a file \fIsource\fP
+(which can be a binary file, so that \fIgrep\fP(1) and similar commands cannot
+be used):
+.IP "Use example \fBShow Positions\fP, piped through \fIwc\fP(1):"
+.sp
+\fBfgres \-r\fP \fIsource\fP \fB\e\fP
+.br
+  \fB\-e '\e#0 \e# \-write' \e\fP
+.br
+  \fB\-e '\fP\fIpattern\fP \fB\en +write \-write +position' \e\fP
+.br
+\fB| wc -l\fP
+.\"}}}
+.\"}}}
+.\"{{{  Files
+.SH FILES
+\fBfgres\fP uses \fItmpnam\fP(3) for temporary files.
+.\"}}}
+.\"{{{  Notes
+.SH NOTES
+Obviously sequences of \fB\-e\fP and \fB\-f\fP
+options are allowed.  In this case, the options are handled
+left-to-right.  The different program parts are joined together and
+handled as a single unit.
+.PP
+Multiple usage of option \fB\-r\fP is handled left-to-right,
+all given files will be read one after the other.  Only one output
+file is generated.
+.\"}}}
+.\"{{{  Diagnostics
+.SH DIAGNOSTICS
+.\"{{{  warnings
+.IP "Warning messages:"
+.RS
+.\"{{{  b and p
+.PP
+\fBcut long replace (\fP\fIprogram-position\fP\fB)\fP
+.br
+\fBpadding short replace (\fP\fIprogram-position\fP\fB)\fP
+.IP
+If \fB\-v\fP, \fB\-b\fP and \fB\-p\fP are active
+and a replace pattern is longer than the corresponding search pattern,
+this messages shows the position of the \fB\-b\fP violation.
+.\"}}}
+.\"{{{  remporary file
+.PP
+\fB(using temporary file \fP\fIfile-name\fP\fB)\fP
+.IP
+The extension of an filtered file cannot be hold in memory and is stored
+in a temporary file (\fItempnam\fP(3)).  Option \fB\-n\fP can
+be used to increase the number of bytes, hold in memory.  
+.\"}}}
+.RE
+.\"}}}
+.\"{{{  errors
+.IP "Error messages:"
+.RS
+.\"{{{  program errors
+.\"{{{  empty program/line
+.PP
+\fBempty search (\fP\fIprogram-position\fP\fB)\fP
+\fBno program given\fP
+.br
+.IP
+Empty \fBfgres\fP programs or invalid search patterns are not allowed.
+.\"}}}
+.\"{{{  nested groups
+.PP
+\fBgroup active (\fP\fIprogram-position\fP\fB)\fP
+.br
+\fBno group active (\fP\fIprogram-position\fP\fB)\fP
+.br
+\fBgroup open at end of program\fP
+.IP
+Nested groups for \fBfgres\fP commands are not allowed. The start- and 
+close-group statements do not fit.
+.\"}}}
+.\"{{{  preserved group ids
+.PP
+\fBinvalid group id (\fP\fIprogram-position\fP\fB)\fP
+.IP
+Invalid group action on replace line or invalid group name on definition
+of a group.  Group names \fBwrite\fP, \fBposition\fP and
+\fBdefault\fP are not allowed on start-group command lines.
+.\"}}}
+.\"{{{  b
+.PP
+\fBgrowing command (\fP\fIprogram-position\fP\fB)\fP
+.br
+\fBshrinking command (\fP\fIprogram-position\fP\fB)\fP
+.br
+\fB-b disables position output (\fP\fIprogram-position\fP\fB)\fP
+.br
+\fB-b disables stop writing (\fP\fIprogram-position\fP\fB)\fP
+.IP
+Option \fB\-b\fP used. The corresponding \fBfgres\fP program 
+lines violates this restriction!
+.\"}}}
+.\"}}}
+.\"{{{  option errors
+.PP
+\fB-n: invalid value\fP
+.br
+\fB-F: invalid string, using default\fP
+.br 
+\fBoption r/w and file argument conflict\fP
+.IP
+Command line parameters are used in an invalid combination or their
+parameters are invalid.
+.\"}}}
+.\"{{{  system errors
+.PP
+\fBcannot open \fP\fIfile-type\fP\fB file \fP\fIfile-name\fP\fB (\fP\fIsystem-error\fP\fB)\fP
+.br
+\fBwrite failed (\fP\fIsystem-error\fP\fB)\fP
+.br
+\fBseek failed (\fP\fIsystem-error\fP\fB)\fP
+.br
+\fBtruncate file failes, padded with \fP\fInumber-bytes\fP\fB 0\fP
+.br
+\fBcannot close \fP\fIfile-name\fP\fB (\fP\fIsystem-error\fP\fB)\fP
+.br
+\fBremove temporary file failed (\fP\fIsystem-error\fP\fB)\fP
+.IP
+System errors occur, the corresponding action couldt not be performed.
+\fBfgres\fP tries to tell you the reason in the fences.
+.\"}}}
+.RE
+.\"}}}
+.\"}}}
+.\"{{{  Restrictions
+.SH RESTRICTIONS
+If there are overlapping patterns/adresses, it is undefined, which of
+these patterns/adresses triggers its actions.
+.PP
+Different \fBfgres\fP program lines for the same pattern/adress are allowed. 
+This situation is handled in the same way, overlapping patterns/adresses
+are handled.
+.PP
+If \fB\-r\fP \fIin\fP is used more than once, patterns are only
+handled inside of the files.  Patterns on the border of two files are not
+recognized!
+.PP
+The output file, given with \fB\-w\fP or standard output may
+not be an inputfile!
+.\"}}}
+.\"{{{  Author
+.SH AUTHOR
+.TP
+Wolfgang Stumvoll at RWTH-Aachen, Germany 
+(stumvoll@pool.informatik.rwth-aachen.de)
+.\"}}}
+.\"{{{  See also
+.SH "SEE ALSO"
+awk(1), dd(1), sed(1), tr(1)
+.\"}}}

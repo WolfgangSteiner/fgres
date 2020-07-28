@@ -1,0 +1,500 @@
+.\' t
+.TH FGRES 1 "February 16, 1994"
+.\"{{{}}}
+.\"{{{  Name
+.SH NAME
+fgres \- search and replace character patterns (v"VERSION") 
+.\"}}}
+.\"{{{  comment
+.SH ATTENTION
+The \fB"\fP\fISTRING\fP\fB"\fP patterns in this manual page will be
+replaced by \fBfgres\fP with the constants, used in the sources, so the
+manual are up-to-date for used characters and constants.  This text will
+also be removed.  The filtered file can be generated with
+.IP 
+\fBmake manual\fP
+.\"}}}
+.\"{{{  Synopsis
+.SH SYNOPSIS
+.ad l
+\fBfgres\fP \fI<options>\fP \fIsearch\fP [\fIreplace\fP [\fIfile\fP .\|.\|.\|]]
+.br
+\fBfgres\fP \fI<options>\fP [\fB\-"OPT_IN"\fP \fIin\fP] [\fB\-"OPT_OUT"\fP \fIout\fP] \fIsearch\fP [\fIreplace\fP]
+.br
+\fBfgres\fP \fI<options>\fP \fI<program>\fP [\fIfile\fP .\|.\|.\|]
+.br
+\fBfgres\fP \fI<options>\fP \fI<program>\fP [\fB\-"OPT_IN"\fP \fIin\fP] [\fB\-"OPT_OUT"\fP \fIout\fP]
+.br
+.br
+where:
+.br
+  \fI<options>\fP=[\fB\-"OPT_BIN""OPT_GROW""OPT_HELP""OPT_CASE""OPT_PAD""OPT_SHRINK""OPT_VERB"\fP] [\fB"OPT_BLOCKS"\fP \fInumber\fP] [\fB\-"OPT_SEP"\fP \fIdelimiter\fP]
+  \fI<program>\fP=(\fB\-"OPT_CMDF"\fP \fIcommand-file\fP | \fB\-"OPT_CMD"\fP \fIcommand\fP) .\|.\|.
+.ad b
+.\"}}}
+.\"{{{  Description
+.SH DESCRIPTION
+.\"{{{  general description
+.SS "General Description"
+\fBfgres\fP (\fBF\fPast \fBGRE\fPp and \fBS\fPubstitute) primary
+function is to substitute or delete character patterns.  It can operate
+on binary and text files or in a pipe.
+.PP
+The command language consists of very straightforward substitution
+patterns.  These commands can be collected in named groups, which can be
+dynamically enabled and disabled.
+.PP
+In addition to the \fBfgres\fP command language, you can also use simple 
+command line arguments for search and replace patterns.
+.\"}}}
+.\"{{{  command line
+.SS "Search and Replace Patterns on Command Line"
+This can be used in the follwoing two ways:
+.TP
+\fBfgres\fP \fI<options>\fP \fIsearch\fP \fIreplace\fP \fIfile\fP .\|.\|.\|
+Replace \fIsearch\fP with \fIreplace\fP (default: empty word) in all
+files \fIfile\fP .\|.\|.  .  The replacement is done in the files,
+without copying them.
+.TP
+\fBfgres\fP \fI<options>\fP [\fB\-"OPT_IN"\fP \fIin\fP] [\fB\-"OPT_OUT"\fP \fIout\fP] \fIsearch\fP [\fIreplace\fP]
+Replace \fIsearch\fP with \fIreplace\fP (default: empty word).  Read all
+files given with \fB\-"OPT_IN"\fP \fIin\fP (default: standard input) and
+write to the file, given with \fB\-"OPT_OUT"\fP \fIout\fP (default:
+standard output).
+.PP
+\fIsearch\fP and \fIreplace\fP are taken literally. 
+.\"}}}
+.\"{{{  program
+.SS "Program with \-"OPT_CMD" or \-"OPT_CMDF":"
+This can be used in the following two ways:
+.TP
+\fBfgres\fP \fI<options>\fP \fI<program>\fP \fIfile\fP .\|.\|.\|
+Execute the command given in \fI<program>\fP and the corresponding 
+actions in all files \fIfile\fP .\|.\|. .
+The replacement is done in the files, without copying them.
+.TP
+\fBfgres\fP \fI<options>\fP \fI<program>\fP [\fB\-"OPT_IN"\fP \fIin\fP] [\fB\-"OPT_OUT"\fP \fIout\fP]
+Execute the command given in \fI<program>\fP and the corresponding
+actions.  Read all files given with \fB\-"OPT_IN"\fP \fIin\fP (default:
+standard input) and write to the file, given with \fB\-"OPT_OUT"\fP
+\fIout\fP (default: standard output).
+.PP
+The basic elements of the \fBfgres\fP program \fI<program>\fP are
+search-and-replace commands.  While these commands can be grouped and
+those groups can be switched on and off, you can build up a kind of a
+\fBfinite state machine\fP.  In detail, a \fBfgres\fP program is a
+sequence of the following statements (field separator is set to the
+default \fB"DFLT_SEPARATOR"\fP):
+.\"{{{  fgres comments
+.IP "\fB"QUOTE_CHAR""CMD_ADRESS""CMD_ADRESS"\fP this is a comment"
+No comment :-)
+.\"}}}
+.\"{{{  pattern
+.IP "\fIsearch\fP [\fIreplace\fP [ (\fB"CMD_START"\fP|\fB"CMD_STOP"\fP)\fIswitch\fP .\|.\|.\|]]"
+Replace the \fIsearch\fP string with \fIreplace\fP and execute the optional
+switches. A switch turns on/off the corresponding named group of commands.
+If switches have to be used with the empty replace string, use
+\fB"QUOTE_CHAR""CMD_ADRESS"\fP for \fIreplace\fP.
+.\"}}}
+.\"{{{  address
+.IP "\fB"QUOTE_CHAR""CMD_ADRESS"\fP\fIstart\fP[\fB"CMD_REGION_LEN"\fP\fIlen\fP] [\fIreplace\fP [ (\fB"CMD_START"\fP|\fB"CMD_STOP"\fP)\fIswitch\fP .\|.\|.\|]]"
+Replace the \fIlen\fP characters, starting at byte number \fIstart\fP
+("START_COUNT" is the first), with \fIreplace\fP and execute the optional
+switches.  \fIlen\fP defaults to zero.  \fIstart\fP and \fIlen\fP can be
+decimal, octal (starting with 0) or hex (starting with 0x).  If switches have
+to be used with the empty replace string, use
+\fB"QUOTE_CHAR""CMD_ADRESS"\fP for \fIreplace\fP.
+.\"}}}
+.\"{{{  group
+.PP
+\fB"QUOTE_CHAR""CMD_ADRESS"\fP \fIname\fP
+.br
+   \fIcommand-1\fP
+.br
+    :
+   \fIcommand-n\fP
+.br
+.br
+\fB"QUOTE_CHAR""CMD_ADRESS"\fP
+.IP
+All \fIcommand\fPs belong to the group \fIname\fP.  They are controlled by
+corresponding (\fB"CMD_START"\fP|\fB"CMD_STOP"\fP)\fIname\fP switches.
+Named groups are switched off at startup.  Nested groups are not allowed.
+.RS
+.PP
+There are three reserved group names:
+.\"{{{  "DFLT_GROUP"
+.IP \fB"DFLT_GROUP"\fP
+This group contains all commands, which are declared outside of groups.
+.\"}}}
+.\"{{{  "WRT_GROUP"
+.IP \fB"WRT_GROUP"\fP
+These switches do not belong to a set of commands, but switch on/off writing to
+the output file.  If \fB"CMD_START""WRT_GROUP"\fP and
+\fB"CMD_STOP""WRT_GROUP"\fP are both used for a command line, the
+replace pattern is printed and output is disabled afterwards.
+.\"}}}
+.\"{{{  "POS_GROUP"
+.IP \fB"POS_GROUP"\fP
+These switches do not belong to a set of commands, but print the current match
+position in hex.  If \fB"CMD_START"\fP(\fB"CMD_STOP"\fP) is used, the
+position will be printed in front (behind) of the replace pattern.  If
+\fB"CMD_START"\fP and \fB"CMD_STOP"\fP are used together, only the last
+one will be activated.  Like in adress patterns, counting starts with
+"START_COUNT".
+.\"}}}
+.RE
+.\"}}}
+.PP
+In strings, you can use \fB"QUOTE_CHAR""QUOTE_CHAR"\fP to get a
+\fB"QUOTE_CHAR"\fP, \fB"QUOTE_CHAR""QUOTE_FOR_NL"\fP to get a
+\fBnewline\fP and \fB"QUOTE_CHAR""QUOTE_FOR_TAB"\fP to get a \fBtab\fP.
+You can also use \fB"QUOTE_CHAR"\fP followed by a decimal, octal
+(starting with 0) or hex (starting with 0x) number to get any character
+(non-printables!) of your character set.
+.PP
+Group identifiers can consist of \fBa\fP-\fBzA\fP-\fBZ_0\fP-\fB9\fP.
+.\"}}}
+.\"}}}
+.\"{{{  Options
+.SH OPTIONS
+.\"{{{  "OPT_CMD"
+.TP
+\fB\-"OPT_CMD"\fP \fIcommand\fP
+Add \fBexpression\fP \fIcommand\fP to the command list.  \fIcommand\fP
+may contain one line of a \fBfgres\fP program.
+.\"}}}
+.\"{{{  "OPT_CMDF"
+.TP
+\fB\-"OPT_CMDF"\fP \fIcmd-file\fP
+Read commands from \fBfile\fP \fIcmd-file\fP. 
+.\"}}}
+.\"{{{  "OPT_SEP"
+.TP
+\fB\-"OPT_SEP"\fP \fIdelimiter\fP
+Any character in the string \fIdelimiter\fP will be used as \fBfield
+separator\fP on \fBfgres\fP program lines.  The default is
+\fB"DFLT_SEPARATOR"\fP.
+.\"}}}
+.\"{{{  "OPT_CASE"
+.TP
+\fB\-"OPT_CASE"\fP
+Pattern matching is done \fBcase insensitive\fP.
+.\"}}}
+.\"{{{  "OPT_BIN"
+.TP
+\fB\-"OPT_BIN"\fP
+Allow only replace commands, which do not change the filesize (typically
+used on \fBbinary\fP files).
+.\"}}}
+.\"{{{  "OPT_GROW"
+.TP
+\fB\-"OPT_GROW"\fP
+If \fB\-"OPT_BIN"\fP was used, this option enables commands, which
+let the file \fBgrow\fP.  If option \fB\-"OPT_BIN"\fP is used after
+\fB\-"OPT_GROW"\fP, this will overwrite \fB\-"OPT_GROW"\fP!
+.\"}}}
+.\"{{{  "OPT_SHRINK"
+.TP
+\fB\-"OPT_SHRINK"\fP
+If \fB\-"OPT_BIN"\fP was used, this option enables commands, which
+let the file \fBshrink\fP.  If option \fB\-"OPT_BIN"\fP is used
+after \fB\-"OPT_SHRINK"\fP, this will overwrite
+\fB\-"OPT_SHRINK"\fP!
+.\"}}}
+.\"{{{  "OPT_PAD"
+.TP
+\fB\-"OPT_PAD"\fP
+Activate \fBpadding\fP.  If \fB\-"OPT_BIN"\fP was used, pad
+substitute patterns with trailing null characters or cut them off, in
+order to match the length of the search pattern.  Using
+\fB\-"OPT_SHRINK"\fP or \fB\-"OPT_GROW"\fP disables padding
+respectively cutting.
+.\"}}}
+.\"{{{  "OPT_VERB"
+.TP
+\fB\-"OPT_VERB"\fP
+Switch on \fBverbose\fP mode.  \fBfgres\fP prints information about read
+and written bytes and meybe some warning messages, if
+\fB\-"OPT_PAD"\fP is used.
+.\"}}}
+.\"{{{  "OPT_IN"
+.TP
+\fB\-"OPT_IN"\fP \fIin\fP
+\fBRead\fP from file \fIin\fP.  If \fIin\fP is \fB"STD_FILE"\fP,
+standard input is used. Multiple usage of \fB\-"OPT_IN"\fP is allowed.
+.\"}}}
+.\"{{{  "OPT_OUT"
+.TP
+\fB\-"OPT_OUT"\fP \fIout\fP
+\fBWrite\fP to file \fIout\fP.  If \fIout\fP is \fB"STD_FILE"\fP, standard
+output is used.
+.\"}}}
+.\"{{{  "OPT_BLOCKS"
+.TP
+\fB\-"OPT_BLOCKS"\fP \fInumber\fP
+If \fBfgres\fP is not used in a pipe, \fBfgres\fP stores blocks of
+"BLOCKSIZE" characters in memory, while extending files.  This option
+overwrites the default value of "BLOCKS" blocks by \fInumber\fP blocks.
+.\"}}}
+.\"{{{  "OPT_HELP"
+.TP
+\fB\-"OPT_HELP"\fP
+Print a long usage as \fBhelp\fP.
+.\"}}}
+.\"}}}
+.\"{{{  Errors
+.SH "RETURN VALUE and ERRORS"
+\fBfgres\fP uses standard output only, if \fBfgres\fP was used in a pipe
+(\fB\-"OPT_IN"\fP or \fB\-"OPT_OUT"\fP or no filter files on command
+line).  The following exit values are used by \fBfgres\fP:
+.PP
+.TS
+tab(@);
+l r | l.
+Exit Status@@Used for
+_
+\fBEX_OK\fP@(0)@everything goes as planed
+
+\fBEX_USAGE\fP@(64)@command line arguments are incorrect
+\fBEX_DATAERR\fP@(65)@\fBfgres\fP program is incorrect or missing
+\fBEX_NOINPUT\fP@(66)@error on reading the filter source
+\fBEX_SOFTWARE\fP@(70)@should never appear
+\fBEX_OSERR\fP@(71)@error on \fImalloc\fP(3), \fIlseek\fP(2),..
+\fBEX_CANTCREAT\fP@(73)@error on writing the filter output
+\fBEX_IOERR\fP@(74)@error on reading/writing
+_
+@(\fI*\fP)@T{
+These are the standard UNIX values for the given symbolic constants.
+T}
+.TE
+.\"}}}
+.\"{{{  examples
+.SH EXAMPLES
+.\"{{{  simple
+.SS "Simple Replacement"
+Substitue all occurrences of \fIfoo\fP with \fIbar\fP in file \fIname\fP:
+.IP
+\fBfgres\fP \fIfoo bar name\fP
+.PP
+or
+.IP
+\fBfgres \-"OPT_CMD" "\fP\fIfoo bar\fP\fB"\fP \fIname\fP
+.\"}}}
+.\"{{{  long
+.SS "Tagged Replacement"
+Substitute the string \fIfoo\fP with \fIbar\fP in the string part of an
+assembler listing \fIlist\fP.  The string part begins with a line
+\fIBEGIN_STRING_DATA\fP and ends at a line \fIEND_STRING_DATA\fP:
+.\"{{{  called with script
+.IP "Use \fBfgres\fP script file \fIfoobar.script\fP:"
+.sp
+\fB"QUOTE_CHAR""CMD_ADRESS""CMD_ADRESS"\fP start foo-bar replace if matching:
+.br
+\fIBEGIN_STRING_DATA BEGIN_STRING_DATA\fP \fB"CMD_START"\fPfoobar
+.sp
+\fB"QUOTE_CHAR""CMD_ADRESS"\fP foobar
+.br
+   \fB"QUOTE_CHAR""CMD_ADRESS""CMD_ADRESS"\fP this is the replace line
+.br
+   \fIfoo bar\fP
+.br
+\fB"QUOTE_CHAR""CMD_ADRESS"\fP
+.sp
+\fB"QUOTE_CHAR""CMD_ADRESS""CMD_ADRESS"\fP end foo-bar replace if matching:
+.br
+\fIEND_STRING_DATA END_STRING_DATA\fP \fB"CMD_STOP"\fPfoobar
+.IP "and call:"
+.sp
+\fBfgres \-"OPT_CMDF"\fP \fIfoobar.script list\fP
+.\"}}}
+.\"{{{  called via command line
+.IP "or simulate \fIfoobar.script\fP with \fB\-"OPT_CMD"\fP options and call:"
+.sp
+\fBfgres \e\fP
+.br
+  \fB\-"OPT_CMD" "\fP\fIBEGIN_STRING_DATA BEGIN_STRING_DATA\fP \fB"CMD_START"\fPfoobar\fB" \e\fP
+.br
+  \fB\-"OPT_CMD" ""QUOTE_CHAR""CMD_ADRESS" \fPfoobar\fB" \e\fP
+.br
+  \fB\-"OPT_CMD" "\fP   \fIfoo bar\fP\fB" \e\fP
+.br
+  \fB\-"OPT_CMD" ""QUOTE_CHAR""CMD_ADRESS"" \e\fP
+.br
+  \fB\-"OPT_CMD" "\fP\fIEND_STRING_DATA END_STRING_DATA\fP \fB"CMD_STOP"\fPfoobar\fB" \e\fP
+.br
+  \fIlist\fP
+.\"}}}
+.\"}}}
+.\"{{{  get positions
+.SS "Show Positions"
+Get all positions of string \fIpattern\fP in a file \fIsource\fP (which can be
+a binary file, so that \fIgrep\fP(1) and similar commands cannot be used):
+.RS
+.IP "Use \fBfgres\fP with options:"
+.sp
+\fBfgres \-"OPT_IN"\fP \fIsource\fP \fB\e\fP
+.br
+  \fB\-"OPT_CMD" '"QUOTE_CHAR""CMD_ADRESS""START_COUNT" "QUOTE_CHAR""CMD_ADRESS" "CMD_STOP""WRT_GROUP"' \e\fP
+.br
+  \fB\-"OPT_CMD" '\fP\fIpattern\fP \fB"QUOTE_CHAR""QUOTE_FOR_NL" "CMD_START""WRT_GROUP" "CMD_STOP""WRT_GROUP" "CMD_START""POS_GROUP"'\fP
+.RE
+.\"}}}
+.\"{{{  count occurrences
+.SS "Count Occurrences"
+Count the number of occurrences of string \fIpattern\fP in a file \fIsource\fP
+(which can be a binary file, so that \fIgrep\fP(1) and similar commands cannot
+be used):
+.IP "Use example \fBShow Positions\fP, piped through \fIwc\fP(1):"
+.sp
+\fBfgres \-"OPT_IN"\fP \fIsource\fP \fB\e\fP
+.br
+  \fB\-"OPT_CMD" '"QUOTE_CHAR""CMD_ADRESS""START_COUNT" "QUOTE_CHAR""CMD_ADRESS" "CMD_STOP""WRT_GROUP"' \e\fP
+.br
+  \fB\-"OPT_CMD" '\fP\fIpattern\fP \fB"QUOTE_CHAR""QUOTE_FOR_NL" "CMD_START""WRT_GROUP" "CMD_STOP""WRT_GROUP" "CMD_START""POS_GROUP"' \e\fP
+.br
+\fB| wc -l\fP
+.\"}}}
+.\"}}}
+.\"{{{  Files
+.SH FILES
+\fBfgres\fP uses \fItmpnam\fP(3) for temporary files.
+.\"}}}
+.\"{{{  Notes
+.SH NOTES
+Obviously sequences of \fB\-"OPT_CMD"\fP and \fB\-"OPT_CMDF"\fP
+options are allowed.  In this case, the options are handled
+left-to-right.  The different program parts are joined together and
+handled as a single unit.
+.PP
+Multiple usage of option \fB\-"OPT_IN"\fP is handled left-to-right,
+all given files will be read one after the other.  Only one output
+file is generated.
+.\"}}}
+.\"{{{  Diagnostics
+.SH DIAGNOSTICS
+.\"{{{  warnings
+.IP "Warning messages:"
+.RS
+.\"{{{  "OPT_BIN" and "OPT_PAD"
+.PP
+"warn_long_replace"
+.br
+"warn_short_replace"
+.IP
+If \fB\-"OPT_VERB"\fP, \fB\-"OPT_BIN"\fP and \fB\-"OPT_PAD"\fP are active
+and a replace pattern is longer than the corresponding search pattern,
+this messages shows the position of the \fB\-"OPT_BIN"\fP violation.
+.\"}}}
+.\"{{{  remporary file
+.PP
+"warn_temp_file"
+.IP
+The extension of an filtered file cannot be hold in memory and is stored
+in a temporary file (\fItempnam\fP(3)).  Option \fB\-"OPT_BLOCKS"\fP can
+be used to increase the number of bytes, hold in memory.  
+.\"}}}
+.RE
+.\"}}}
+.\"{{{  errors
+.IP "Error messages:"
+.RS
+.\"{{{  program errors
+.\"{{{  empty program/line
+.PP
+"error_empty_search"
+"error_no_prog"
+.br
+.IP
+Empty \fBfgres\fP programs or invalid search patterns are not allowed.
+.\"}}}
+.\"{{{  nested groups
+.PP
+"error_group"
+.br
+"error_no_group"
+.br
+"error_open_group"
+.IP
+Nested groups for \fBfgres\fP commands are not allowed. The start- and 
+close-group statements do not fit.
+.\"}}}
+.\"{{{  preserved group ids
+.PP
+"error_invalid_group"
+.IP
+Invalid group action on replace line or invalid group name on definition
+of a group.  Group names \fB"WRT_GROUP"\fP, \fB"POS_GROUP"\fP and
+\fB"DFLT_GROUP"\fP are not allowed on start-group command lines.
+.\"}}}
+.\"{{{  "OPT_BIN"
+.PP
+"error_grow_command"
+.br
+"error_shrink_command"
+.br
+"error_pos"
+.br
+"error_stop_write"
+.IP
+Option \fB\-"OPT_BIN"\fP used. The corresponding \fBfgres\fP program 
+lines violates this restriction!
+.\"}}}
+.\"}}}
+.\"{{{  option errors
+.PP
+"error_noblocks"
+.br
+"error_separator"
+.br 
+"error_redirect"
+.IP
+Command line parameters are used in an invalid combination or their
+parameters are invalid.
+.\"}}}
+.\"{{{  system errors
+.PP
+"error_open_file"
+.br
+"error_write"
+.br
+"error_seek"
+.br
+"error_truncate"
+.br
+"error_close_f"
+.br
+"error_unlink"
+.IP
+System errors occur, the corresponding action couldt not be performed.
+\fBfgres\fP tries to tell you the reason in the fences.
+.\"}}}
+.RE
+.\"}}}
+.\"}}}
+.\"{{{  Restrictions
+.SH RESTRICTIONS
+If there are overlapping patterns/adresses, it is undefined, which of
+these patterns/adresses triggers its actions.
+.PP
+Different \fBfgres\fP program lines for the same pattern/adress are allowed. 
+This situation is handled in the same way, overlapping patterns/adresses
+are handled.
+.PP
+If \fB\-"OPT_IN"\fP \fIin\fP is used more than once, patterns are only
+handled inside of the files.  Patterns on the border of two files are not
+recognized!
+.PP
+The output file, given with \fB\-"OPT_OUT"\fP or standard output may
+not be an inputfile!
+.\"}}}
+.\"{{{  Author
+.SH AUTHOR
+.TP
+Wolfgang Stumvoll at RWTH-Aachen, Germany 
+(stumvoll@pool.informatik.rwth-aachen.de)
+.\"}}}
+.\"{{{  See also
+.SH "SEE ALSO"
+awk(1), dd(1), sed(1), tr(1)
+.\"}}}

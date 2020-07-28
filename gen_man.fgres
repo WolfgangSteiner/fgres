@@ -1,0 +1,65 @@
+\##{{{}}}
+\##{{{  copyright
+\########################################################################
+\##	fgres script to transform global.h/messages.c files into a	#
+\##	fgres-script, which replaces the symbolic strings in the man-	#
+\##	page bye the used string constants. 				#
+\##									#
+\##	Copyright (c) 1994, W. Stumvoll, Germany			#
+\##	#include "README"						#
+\########################################################################
+\##}}}
+\##{{{  comment
+\########################################################################
+\##									#
+\##	This is not a good example for a fgres script!			#
+\##	It has to generate another fgres script (many quotes), reading	#
+\##	C-source, ignoring its quotes!					#
+\##									#
+\########################################################################
+\##}}}
+\##{{{  startup
+\#0	.\\\\"{{{\\\ \\\ comment\ .\\\\"\\\ skipped\\\ auto-comment\ -write\ -default\ +comm_skip\n\\#\ comm_skip\n\\\\"}}}\ \\#\ +write\ -comm_skip\ +default\n\\#\n -write
+\##}}}
+\##{{{  handle define lines for global constants
+/*{{{\ \ global\ constants*/\n \\##\ constant\ fold\ started\n +handle -default +write
+\# handle
+	#define\ 	"		+write
+	\t
+	'		"\t		-handle +char
+	"		"\t		-handle +text_or_number
+	(		"\t		-handle +text_or_number
+	/*}}}		\#		-write -handle +default
+\#
+\# text_or_number
+	"\n		\n		-write -text_or_number +handle
+	)\n		\n		-write -text_or_number +handle
+\#
+\# char
+	-		\\\\-
+	','		\\\\fP\\\ or\\\ \\\\fB
+	\  		space
+	\\t		tab
+	\\n		newline
+	\\\\		\\\\e
+	'\n		\n		-write -char +handle
+\#
+\##}}}
+\##{{{  error message handling
+/*{{{\ \ global\ messages:	\\##\ msg\ fold\ started\n +write +error -default -write
+\# error
+	public\ const\ char\ 	"	+write -error +message
+	/*}}}		\#		-error +default
+\#
+\# message
+	\ 		\\\ 		+write
+	[]="		"\t\\\\fB
+	"PROG_POS_F"	(\\\\fP\\\\fIprogram-position\\\\fP\\\\fB)
+	"FILE_TYPE_F"	\\\\fP\\\\fIfile-type\\\\fP\\\\fB
+	"FILE_NAME_F"	\\\\fP\\\\fIfile-name\\\\fP\\\\fB
+	"SYS_ERROR_F"	(\\\\fP\\\\fIsystem-error\\\\fP\\\\fB)
+	"BYTE_COUNT_F"	\\\\fP\\\\fInumber-bytes\\\\fP\\\\fB
+	\\n
+	";\n		\\\\fP\n	-write -message +error
+\#
+\##}}}
